@@ -24,7 +24,6 @@ pipeline {
         stage('Build WAR') {
             steps {
                 sh '''
-                    cd dotcom-jboss-helloworld
                     mvn -U -s jboss-settings.xml \
                     -Dversion.war.plugin=3.2.3 \
                     -Dmaven.compiler.source=1.8 \
