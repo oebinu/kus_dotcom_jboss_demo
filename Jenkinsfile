@@ -95,6 +95,23 @@ ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagem
     }
 
     post {
+        always {
+            // 빌드 정보 출력
+            script {
+                def buildInfo = """
+                ================================================
+                🚀 JBoss 빌드 완료 정보
+                ================================================
+                📁 Git 저장소: https://github.com/oebinu/kus_dotcom_jboss_demo.git
+                🏷️  Git 커밋: ${env.GIT_COMMIT?.take(7) ?: 'unknown'}
+                📦 WAR 파일: ${env.WAR_FILE ?: 'N/A'}
+                🐳 Docker 이미지: aws-kia-dotcom-eks:jboss-runtime_${env.IMG_TAG ?: 'N/A'}
+                ⏰ 빌드 시간: ${new Date()}
+                ================================================
+                """
+                echo buildInfo
+            }
+        }
         success {
             echo "✅ SUCCESS: JBoss 런타임 이미지 빌드·푸시 완료!"
             // Slack 알림이나 이메일 알림을 추가할 수 있습니다
