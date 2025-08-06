@@ -7,6 +7,58 @@ git clone https://github.com/kparent/jboss-helloworld.git
 
 
 
+```bash
+# https://github.com/jboss-developer/jboss-eap-quickstarts/tree/main/helloworld
+
+git clone https://github.com/kparent/jboss-helloworld.git
+cd dotcom-jboss-helloworld
+
+mvn clean install
+
+mvn clean package -DskipTests
+ls -la /opt/wildfly/standalone/deployments/
+---
+-rw-r--r--. 1 501 games 8888 Dec  5  2023 README.txt
+---
+
+
+# target 디렉토리에 생성된 WAR 파일을 배포
+sudo cp target/jboss-helloworld.war /opt/wildfly/standalone/deployments/
+
+
+ls -la /opt/wildfly/standalone/deployments/
+---
+-rw-r--r--. 1  501 games 8888 Dec  5  2023 README.txt
+-rw-r--r--. 1 root root  6642 Aug  6 00:54 jboss-helloworld.war
+---
+
+
+
+
+sudo /opt/wildfly/bin/standalone.sh -Djboss.http.port=8090
+# 백그라운드로 실행하려면
+sudo /opt/wildfly/bin/standalone.sh -Djboss.http.port=8090 &
+
+
+
+curl -v http://localhost:8090/jboss-helloworld
+http://54.148.19.101:8090/jboss-helloworld
+
+http://kusjen.duckdns.org:8090/jboss-helloworld
+```
+
+
+## 재배포
+```bash
+# 1. 빌드
+cd dotcom-jboss-helloworld
+mvn clean package -DskipTests
+# 2. 기존 WAR 파일 교체 (WildFly 실행 상태 유지)
+sudo cp target/jboss-helloworld.war /opt/wildfly/standalone/deployments/
+
+
+
+
 
 
 
