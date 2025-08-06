@@ -23,24 +23,55 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                sh '''
-                    mvn -U -s jboss-settings.xml \
-                    -Dversion.war.plugin=3.2.3 \
-                    -Dmaven.compiler.source=1.8 \
-                    -Dmaven.compiler.target=1.8 \
-                    clean install -DskipTests
-                '''
+                // 현재 디렉토리 구조 확인
+                sh 'pwd && ls -la'
+                
                 script {
-                    // def ts     = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
-                    // def rev    = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
-                    // env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${ts}_${rev}.war"
-                    // sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
-                    // env.IMG_TAG  = "${ts}-${rev}"
+                    // 디렉토리 존재 여부 확인
+                    def dirExists = sh(script: "test -d dotcom-jboss-helloworld && echo 'exists' || echo 'not_exists'", returnStdout: true).trim()
+                    echo ">>> dotcom-jboss-helloworld 디렉토리 존재 여부: ${dirExists}"
+                    
+                    if (dirExists == 'exists') {
+                        // 디렉토리가 존재하는 경우
+                        sh '''
+                            cd dotcom-jboss-helloworld
+                            mvn -U -s jboss-settings.xml \
+                            -Dversion.war.plugin=3.2.3 \
+                            -Dmaven.compiler.source=1.8 \
+                            -Dmaven.compiler.target=1.8 \
+                            clean install -DskipTests
+                        '''
+                    } else {
+                        // 디렉토리가 존재하지 않는 경우 - 루트에서 실행
+                        sh '''
+                            mvn -U -s jboss-settings.xml \
+                            -Dversion.war.plugin=3.2.3 \
+                            -Dmaven.compiler.source=1.8 \
+                            -Dmaven.compiler.target=1.8 \
+                            clean install -DskipTests
+                        '''
+                    }
+                }
+                
+                script {
                     def rev = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
-                    env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${rev}.war"
-                    sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
+                    
+                    // WAR 파일 위치 확인
+                    def warExists = sh(script: "test -f dotcom-jboss-helloworld/target/jboss-helloworld.war && echo 'subdir' || test -f target/jboss-helloworld.war && echo 'root' || echo 'none'", returnStdout: true).trim()
+                    echo ">>> WAR 파일 위치: ${warExists}"
+                    
+                    if (warExists == 'subdir') {
+                        env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${rev}.war"
+                        sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
+                    } else if (warExists == 'root') {
+                        env.WAR_FILE = "target/jboss-helloworld_${rev}.war"
+                        sh "mv target/jboss-helloworld.war ${env.WAR_FILE}"
+                    } else {
+                        error "WAR 파일을 찾을 수 없습니다!"
+                    }
+                    
                     env.IMG_TAG = "${rev}"
-
+                    
                     // 빌드 정보 출력
                     echo ">>> WAR 파일: ${env.WAR_FILE}"
                     echo ">>> 이미지 태그: ${env.IMG_TAG}"
