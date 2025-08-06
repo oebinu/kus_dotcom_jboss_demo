@@ -32,12 +32,16 @@ pipeline {
                     clean install -DskipTests
                 '''
                 script {
-                    def ts     = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
-                    def rev    = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
-                    env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${ts}_${rev}.war"
+                    // def ts     = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
+                    // def rev    = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
+                    // env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${ts}_${rev}.war"
+                    // sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
+                    // env.IMG_TAG  = "${ts}-${rev}"
+                    def rev = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
+                    env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${rev}.war"
                     sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
-                    env.IMG_TAG  = "${ts}-${rev}"
-                    
+                    env.IMG_TAG = "${rev}"
+
                     // 빌드 정보 출력
                     echo ">>> WAR 파일: ${env.WAR_FILE}"
                     echo ">>> 이미지 태그: ${env.IMG_TAG}"
