@@ -72,6 +72,49 @@ pipeline {
                     sh "docker push ${repo}:${tag}"
                     
                     echo ">>> Docker 이미지 푸시 완료: ${repo}:${tag}"
+                    
+                    // 전체 이미지 태그 저장 (배포용)
+                    env.FULL_IMAGE_TAG = "${repo}:${tag}"
+                }
+            }
+        }
+
+        stage('Update Deployment YAML') {
+            steps {
+                script {
+                    echo ">>> 배포 YAML 업데이트 시작"
+                    
+                    // 배포 저장소 클론
+                    sh '''
+                        rm -rf kus_dotcom_jboss_deploy
+                        git clone https://github.com/oebinu/kus_dotcom_jboss_deploy.git
+                        cd kus_dotcom_jboss_deploy
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@example.com"
+                    '''
+                    
+                    // YAML 파일에서 이미지 태그 업데이트
+                    sh """
+                        cd kus_dotcom_jboss_deploy
+                        echo ">>> 현재 deployment.yaml 내용:"
+                        cat jboss_sample/01_jboss_deployment.yaml | grep -A2 -B2 image:
+                        
+                        # 이미지 태그 업데이트
+                        sed -i 's|image: 443102424924.dkr.ecr.us-west-2.amazonaws.com/aws-kia-dotcom-eks:.*|image: ${env.FULL_IMAGE_TAG}|g' jboss_sample/01_jboss_deployment.yaml
+                        
+                        echo ">>> 업데이트된 deployment.yaml 내용:"
+                        cat jboss_sample/01_jboss_deployment.yaml | grep -A2 -B2 image:
+                    """
+                    
+                    // 변경사항 커밋 및 푸시
+                    sh """
+                        cd kus_dotcom_jboss_deploy
+                        git add jboss_sample/01_jboss_deployment.yaml
+                        git commit -m "Update JBoss image tag to ${env.FULL_IMAGE_TAG} - Build ${env.BUILD_NUMBER}"
+                        git push origin main
+                    """
+                    
+                    echo ">>> 배포 YAML 업데이트 완료: ${env.FULL_IMAGE_TAG}"
                 }
             }
         }
@@ -83,13 +126,15 @@ pipeline {
             script {
                 def buildInfo = """
                 ================================================
-                🚀 JBoss 빌드 완료 정보
+                🚀 JBoss 빌드 및 배포 완료 정보
                 ================================================
-                📁 Git 저장소: https://github.com/oebinu/kus_dotcom_jboss_demo.git
+                📁 소스 저장소: https://github.com/oebinu/kus_dotcom_jboss_demo.git
+                📁 배포 저장소: https://github.com/oebinu/kus_dotcom_jboss_deploy.git
                 🏷️  Git 커밋: ${env.GIT_COMMIT?.take(7) ?: 'unknown'}
                 📦 WAR 파일: ${env.WAR_FILE ?: 'N/A'}
-                🐳 Docker 이미지: aws-kia-dotcom-eks:jboss-runtime_${env.IMG_TAG ?: 'N/A'}
+                🐳 Docker 이미지: ${env.FULL_IMAGE_TAG ?: 'N/A'}
                 📄 Dockerfile: ./Dockerfile
+                📄 배포 YAML: jboss_sample/01_jboss_deployment.yaml
                 ⏰ 빌드 시간: ${new Date()}
                 ================================================
                 """
@@ -97,10 +142,14 @@ pipeline {
             }
         }
         success {
-            echo "✅ SUCCESS: JBoss 런타임 이미지 빌드·푸시 완료!"
+            echo "✅ SUCCESS: JBoss 런타임 이미지 빌드·푸시 및 배포 YAML 업데이트 완료!"
         }
         failure {
-            echo "❌ FAILURE: 빌드 실패. 로그를 확인하세요."
+            echo "❌ FAILURE: 빌드 또는 배포 업데이트 실패. 로그를 확인하세요."
+        }
+        cleanup {
+            // 임시 디렉토리 정리
+            sh 'rm -rf kus_dotcom_jboss_deploy || true'
         }
     }
 }
