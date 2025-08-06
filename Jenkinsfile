@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        // GitHub webhook 전용 트리거
+        githubPush()
+    }
     
     tools {
         jdk    'Java11'
