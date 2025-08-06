@@ -5,7 +5,6 @@ git clone https://github.com/kparent/jboss-helloworld.git
 
 
 
-
 ```bash
 # https://github.com/jboss-developer/jboss-eap-quickstarts/tree/main/helloworld
 
