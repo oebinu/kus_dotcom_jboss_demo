@@ -10,7 +10,7 @@ git clone https://github.com/kparent/jboss-helloworld.git
 ```bash
 # https://github.com/jboss-developer/jboss-eap-quickstarts/tree/main/helloworld
 
-git clone https://github.com/kparent/jboss-helloworld.git
+git clone https://github.com/oebinu/kus_dotcom_jboss_demo.git
 cd dotcom-jboss-helloworld
 
 mvn clean install
@@ -56,6 +56,28 @@ mvn clean package -DskipTests
 # 2. 기존 WAR 파일 교체 (WildFly 실행 상태 유지)
 sudo cp target/jboss-helloworld.war /opt/wildfly/standalone/deployments/
 
+
+
+ps aux | grep wildfly
+sudo kill 1212067
+
+
+
+
+#
+                  mvn -U -s jboss-settings.xml \
+                    -Dversion.war.plugin=3.2.3 \
+                    -Dmaven.compiler.source=1.8 \
+                    -Dmaven.compiler.target=1.8 \
+                    clean install -DskipTests
+#
+
+
+```
+
+
+# jboss-settings.xml
+  - 빌드 시 사용하는 설정 파일
 
 
 
