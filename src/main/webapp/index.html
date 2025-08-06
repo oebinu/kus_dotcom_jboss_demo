@@ -15,9 +15,102 @@
     limitations under the License.
 -->
 <!-- Plain HTML page that kicks us into the app -->
-
+<!-- 
 <html>
 <head>
 <meta http-equiv="Refresh" content="0; URL=HelloWorld">
 </head>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JBoss HelloWorld Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .welcome-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .status {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 JBoss HelloWorld Application</h1>
+        
+        <div class="welcome-message">
+            <p>JBoss/WildFly 애플리케이션에 오신 것을 환영합니다!</p>
+            <p class="status">✅ 애플리케이션이 정상적으로 실행 중입니다.</p>
+        </div>
+        
+        <div>
+            <a href="HelloWorld" class="button">HelloWorld 서블릿 보기</a>
+        </div>
+        
+        <div class="info">
+            <h3>애플리케이션 정보</h3>
+            <p><strong>컨텍스트 루트:</strong> /jboss</p>
+            <p><strong>서버:</strong> WildFly 31.0.0</p>
+            <p><strong>기술 스택:</strong> Java EE, CDI, Servlet 3.0</p>
+            <p><strong>현재 시간:</strong> <span id="currentTime"></span></p>
+        </div>
+    </div>
+    
+    <script>
+        // 현재 시간 표시
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('ko-KR');
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        console.log('JBoss HelloWorld Application 로드됨');
+        console.log('컨텍스트: /jboss');
+    </script>
+</body>
 </html>
