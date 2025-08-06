@@ -38,11 +38,6 @@ pipeline {
                     clean install -DskipTests
                 '''
                 script {
-                    // def ts     = sh(script: "date +%Y%m%d%H%M%S", returnStdout: true).trim()
-                    // def rev    = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
-                    // env.WAR_FILE = "dotcom-jboss-helloworld/target/jboss-helloworld_${ts}_${rev}.war"
-                    // sh "mv dotcom-jboss-helloworld/target/jboss-helloworld.war ${env.WAR_FILE}"
-                    // env.IMG_TAG  = "${ts}-${rev}"
                     def rev = sh(script: "git rev-parse --short=7 HEAD", returnStdout: true).trim()
                     env.WAR_FILE = "target/jboss-helloworld_${rev}.war"
                     sh "mv target/jboss-helloworld.war ${env.WAR_FILE}"
@@ -56,24 +51,6 @@ pipeline {
             }
         }
 
-        // JBoss/WildFly 기반 이미지 작성
-        stage('Write Dockerfile') {
-            steps {
-                writeFile file: 'Dockerfile', text: '''\
-FROM quay.io/wildfly/wildfly:31.0.0.Final-jdk17
-
-EXPOSE 8080
-EXPOSE 9990
-
-ARG WAR_FILE
-COPY ${WAR_FILE} /opt/jboss/wildfly/standalone/deployments/
-
-# JBoss/WildFly 실행
-ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagement 0.0.0.0"]
-'''
-            }
-        }
-
         stage('Build & Push Docker Image') {
             steps {
                 script {
@@ -81,6 +58,8 @@ ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagem
                     def tag  = "jboss-runtime_${env.IMG_TAG}"
 
                     echo ">>> Docker 이미지 빌드 시작: ${repo}:${tag}"
+                    echo ">>> 사용할 Dockerfile: ./Dockerfile"
+                    echo ">>> WAR 파일: ${env.WAR_FILE}"
 
                     // ECR 로그인
                     sh """
@@ -88,8 +67,8 @@ ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagem
                         | docker login --username AWS --password-stdin ${repo}
                     """
 
-                    // Docker 빌드 & 푸시
-                    sh "docker build --build-arg WAR_FILE=${env.WAR_FILE} -t ${repo}:${tag} ."
+                    // Docker 빌드 & 푸시 (기존 Dockerfile 사용)
+                    sh "docker build --build-arg WAR_FILE=${env.WAR_FILE} -t ${repo}:${tag} -f Dockerfile ."
                     sh "docker push ${repo}:${tag}"
                     
                     echo ">>> Docker 이미지 푸시 완료: ${repo}:${tag}"
@@ -110,6 +89,7 @@ ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagem
                 🏷️  Git 커밋: ${env.GIT_COMMIT?.take(7) ?: 'unknown'}
                 📦 WAR 파일: ${env.WAR_FILE ?: 'N/A'}
                 🐳 Docker 이미지: aws-kia-dotcom-eks:jboss-runtime_${env.IMG_TAG ?: 'N/A'}
+                📄 Dockerfile: ./Dockerfile
                 ⏰ 빌드 시간: ${new Date()}
                 ================================================
                 """
@@ -118,11 +98,9 @@ ENTRYPOINT ["sh","-c","/opt/jboss/wildfly/bin/standalone.sh -b 0.0.0.0 -bmanagem
         }
         success {
             echo "✅ SUCCESS: JBoss 런타임 이미지 빌드·푸시 완료!"
-            // Slack 알림이나 이메일 알림을 추가할 수 있습니다
         }
         failure {
             echo "❌ FAILURE: 빌드 실패. 로그를 확인하세요."
-            // 실패 시 알림 설정 가능
         }
     }
 }
