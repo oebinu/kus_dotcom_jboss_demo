@@ -98,13 +98,12 @@ pipeline {
                         sh """
                             cd kus_dotcom_jboss_deploy
                             echo ">>> 현재 deployment.yaml 내용:"
-                            cat jboss_sample/01_jboss_deployment.yaml | grep -A2 -B2 image:
+                            cat jboss_sample/01_jboss_deployment.yaml | grep -B2 image:
                             
-                            # 이미지 태그 업데이트
-                            sed -i 's|image: 443102424924.dkr.ecr.us-west-2.amazonaws.com/aws-kia-dotcom-eks:.*|image: ${env.FULL_IMAGE_TAG}|g' jboss_sample/01_jboss_deployment.yaml
+                            sed -i 's|image: .*|image: ${env.FULL_IMAGE_TAG}|g' jboss_sample/01_jboss_deployment.yaml
                             
                             echo ">>> 업데이트된 deployment.yaml 내용:"
-                            cat jboss_sample/01_jboss_deployment.yaml | grep -A2 -B2 image:
+                            cat jboss_sample/01_jboss_deployment.yaml | grep -B2 image:
                         """
                         
                         // 변경사항 커밋 및 푸시
