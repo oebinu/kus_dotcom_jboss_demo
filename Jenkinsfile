@@ -45,15 +45,9 @@ pipeline {
                     
                     // 수동 승인 요청
                     timeout(time: 10, unit: 'MINUTES') {
-                        input message: '''JBoss 애플리케이션 빌드를 진행하시겠습니까?
-                        
-🔹 WAR 파일 빌드
-🔹 Docker 이미지 생성 및 ECR 푸시  
-🔹 배포 YAML 업데이트
-
-위 작업들이 순차적으로 실행됩니다.''', 
+                        input message: '''JBoss 애플리케이션 빌드를 진행하시겠습니까?''', 
                               ok: '빌드 승인', 
-                              submitter: 'admin,devops,developer',
+                              submitter: 'admin,devops,developer,Dev-Test',
                               submitterParameter: 'APPROVER'
                     }
                     

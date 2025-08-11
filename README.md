@@ -4,6 +4,7 @@ https://github.com/jboss-developer/jboss-eap-quickstarts/tree/main/helloworld
 git clone https://github.com/kparent/jboss-helloworld.git
 
 
+http://kusjen.duckdns.org:8080
 http://kusjen.duckdns.org:8080/github-webhook/
 http://kusjen.duckdns.org:8080/generic-webhook-trigger/invoke?token=oebinu-github-token
 http://54.148.19.101:8080/generic-webhook-trigger/invoke?token=oebinu-github-token
