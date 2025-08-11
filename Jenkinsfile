@@ -25,6 +25,43 @@ pipeline {
             }
         }
 
+        stage('Build Approval') {
+            steps {
+                script {
+                    // 빌드 정보 출력
+                    def commitInfo = sh(script: "git log -1 --pretty=format:'%h - %s (%an, %ar)'", returnStdout: true).trim()
+                    def branchInfo = sh(script: "git branch --show-current", returnStdout: true).trim()
+                    
+                    echo """
+                    ================================================
+                    🔍 빌드 승인 요청
+                    ================================================
+                    📁 저장소: https://github.com/oebinu/kus_dotcom_jboss_demo.git
+                    🌿 브랜치: ${branchInfo}
+                    📝 최근 커밋: ${commitInfo}
+                    ⏰ 요청 시간: ${new Date()}
+                    ================================================
+                    """
+                    
+                    // 수동 승인 요청
+                    timeout(time: 10, unit: 'MINUTES') {
+                        input message: '''JBoss 애플리케이션 빌드를 진행하시겠습니까?
+                        
+🔹 WAR 파일 빌드
+🔹 Docker 이미지 생성 및 ECR 푸시  
+🔹 배포 YAML 업데이트
+
+위 작업들이 순차적으로 실행됩니다.''', 
+                              ok: '빌드 승인', 
+                              submitter: 'admin,devops,developer',
+                              submitterParameter: 'APPROVER'
+                    }
+                    
+                    echo "✅ 빌드가 승인되었습니다. 승인자: ${env.APPROVER ?: 'Unknown'}"
+                }
+            }
+        }
+
         stage('Build WAR') {
             steps {
                 // 현재 디렉토리 구조 확인
