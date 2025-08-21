@@ -129,18 +129,18 @@ pipeline {
                         sh """
                             cd kus_dotcom_jboss_deploy
                             echo ">>> 현재 deployment.yaml 내용:"
-                            cat jboss_sample/01_jboss_deployment.yaml | grep -B2 image:
+                            cat jboss_sample/01_jboss_rollouts.yaml | grep -B2 image:
                             
-                            sed -i 's|image: .*|image: ${env.FULL_IMAGE_TAG}|g' jboss_sample/01_jboss_deployment.yaml
+                            sed -i 's|image: .*|image: ${env.FULL_IMAGE_TAG}|g' jboss_sample/01_jboss_rollouts.yaml
                             
                             echo ">>> 업데이트된 deployment.yaml 내용:"
-                            cat jboss_sample/01_jboss_deployment.yaml | grep -B2 image:
+                            cat jboss_sample/01_jboss_rollouts.yaml | grep -B2 image:
                         """
                         
                         // 변경사항 커밋 및 푸시
                         sh """
                             cd kus_dotcom_jboss_deploy
-                            git add jboss_sample/01_jboss_deployment.yaml
+                            git add jboss_sample/01_jboss_rollouts.yaml
                             git commit -m "Update JBoss image tag to ${env.FULL_IMAGE_TAG} - Build ${env.BUILD_NUMBER}"
                             git push https://${GITHUB_TOKEN}@github.com/oebinu/kus_dotcom_jboss_deploy.git main
                         """
@@ -166,7 +166,7 @@ pipeline {
                 📦 WAR 파일: ${env.WAR_FILE ?: 'N/A'}
                 🐳 Docker 이미지: ${env.FULL_IMAGE_TAG ?: 'N/A'}
                 📄 Dockerfile: ./Dockerfile
-                📄 배포 YAML: jboss_sample/01_jboss_deployment.yaml
+                📄 배포 YAML: jboss_sample/01_jboss_rollouts.yaml
                 ⏰ 빌드 시간: ${new Date()}
                 ================================================
                 """
